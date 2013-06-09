@@ -4,20 +4,23 @@ module CSSPool
   class TestSelector < CSSPool::TestCase
     def test_specificity
       doc = CSSPool.CSS <<-eocss
-        *, foo > bar, #hover, :hover, div#a, a.foo, a:hover, a[href][int="10"]{ background: red; }
+        *, foo > bar, #hover, :hover, div#a, a.foo, a:hover, a[href][int="10"], p::selection { background: red; }
       eocss
       selectors = doc.rule_sets.first.selectors
       specs = selectors.map do |sel|
         sel.specificity
       end
-      assert_equal [[0, 0, 1],
+      assert_equal [
+       [0, 0, 0],
        [0, 0, 2],
+       [1, 0, 0],
+       [0, 1, 0],
        [1, 0, 1],
        [0, 1, 1],
-       [1, 0, 1],
        [0, 1, 1],
-       [0, 1, 1],
-       [0, 2, 1]], specs
+       [0, 2, 1],
+       [0, 0, 2]
+      ], specs
     end
 
     def test_selector_knows_its_ruleset

@@ -1,7 +1,7 @@
 class CSSPool::CSS::Parser
 
 token CHARSET_SYM IMPORT_SYM STRING SEMI IDENT S COMMA LBRACE RBRACE STAR HASH
-token LSQUARE RSQUARE EQUAL INCLUDES DASHMATCH RPAREN FUNCTION GREATER PLUS
+token LSQUARE RSQUARE EQUAL INCLUDES DASHMATCH RPAREN FUNCTION PSEUDOELEMENT GREATER PLUS
 token SLASH NUMBER MINUS LENGTH PERCENTAGE EMS EXS ANGLE TIME FREQ URI
 token IMPORTANT_SYM MEDIA_SYM
 
@@ -190,6 +190,11 @@ rule
     : pseudo_scope IDENT {
         result = Selectors::PseudoClass.new(
           interpret_identifier(val[1])
+        )
+      }
+    | pseudo_scope PSEUDOELEMENT {
+        result = Selectors::PseudoElement.new(
+          val[1]
         )
       }
     | pseudo_scope FUNCTION RPAREN {

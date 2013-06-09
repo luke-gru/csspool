@@ -13,6 +13,7 @@ module CSSPool
           div a.foo, #bar, * { background: red; }
           div#a, a.foo, a:hover, a[href][int="10"]{ background: red; }
           div#a, a.foo, a::hover, a[href][int="10"]{ background: red; }
+          div#a, a.foo, a::after, a[href][int="10"]{ background: red; }
         eocss
         @parser = CSSPool::SAC::Parser.new(@doc)
         @parser.parse(@css)
@@ -99,6 +100,16 @@ module CSSPool
         simple_selector = selector.simple_selectors.first # => a::hover
         assert_equal 'hover', simple_selector.additional_selectors.first.name
         assert_nil simple_selector.additional_selectors.first.extra
+      end
+
+      # div#a, a.foo, a::after, a[href][int="10"]{ background: red; }
+      def test_pseudo_element_additional_selector
+        selectors_for_rule = @doc.start_selectors[3]
+        selector = selectors_for_rule[2] # => 'a::after'
+        simple_selector = selector.simple_selectors.first # => a::after
+        assert_equal 'after', simple_selector.additional_selectors.first.name
+        assert_nil simple_selector.additional_selectors.first.extra
+        assert_equal CSSPool::Selectors::PseudoElement, simple_selector.additional_selectors.first.class
       end
 
       # div#a, a.foo, a:hover, a[href][int="10"]{ background: red; }

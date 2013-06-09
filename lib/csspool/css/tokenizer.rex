@@ -38,6 +38,7 @@ rule
             {w}@charset{w}   { [:CHARSET_SYM, st(text)] }
             {w}@media{w}     { [:MEDIA_SYM, st(text)] }
             {w}!({w}|{w}{comment}{w})important{w}  { [:IMPORTANT_SYM, st(text)] }
+            after|before|first-letter|first-line|selection { [:PSEUDOELEMENT, st(text)] }
             {ident}          { [:IDENT, st(text)] }
             \#{name}         { [:HASH, st(text)] }
             {w}~={w}         { [:INCLUDES, st(text)] }
@@ -58,7 +59,7 @@ rule
             {w};{w}          { [:SEMI, st(';')] }
             \*               { [:STAR, st(text)] }
             {w}~{w}          { [:TILDE, st(text)] }
-            \:not\({w}       { [:NOT, st(text)]  }
+            \:\:?not\({w}       { [:NOT, st(text)]  }
             {w}{num}em{w}    { [:EMS, st(text)] }
             {w}{num}ex{w}    { [:EXS, st(text)] }
 
