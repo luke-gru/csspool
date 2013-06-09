@@ -187,24 +187,30 @@ rule
       }
     ;
   pseudo
-    : ':' IDENT {
+    : pseudo_scope IDENT {
         result = Selectors::PseudoClass.new(
           interpret_identifier(val[1])
         )
       }
-    | ':' FUNCTION RPAREN {
+    | pseudo_scope FUNCTION RPAREN {
         result = Selectors::PseudoClass.new(
           interpret_identifier(val[1].sub(/\($/, '')),
           ''
         )
       }
-    | ':' FUNCTION IDENT RPAREN {
+    | pseudo_scope FUNCTION IDENT RPAREN {
         result = Selectors::PseudoClass.new(
           interpret_identifier(val[1].sub(/\($/, '')),
           interpret_identifier(val[2])
         )
       }
     ;
+
+    pseudo_scope:
+      ':'   { result = val[0] }
+    | '::'  { result = val[0] }
+    ;
+
   declarations
     : declaration SEMI declarations
     | declaration SEMI

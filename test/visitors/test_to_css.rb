@@ -170,7 +170,7 @@ module CSSPool
         end
       end
 
-      def test_selector_psuedo
+      def test_selector_pseudo
         input_output = {
           "pseudo" => ":pseudo",
           "\"quotes\"" => ":\\000022quotes\\000022",

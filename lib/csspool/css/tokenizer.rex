@@ -75,11 +75,12 @@ rule
             -->              { [:CDC, st(text)] }
             {w}\-(?!{ident}){w}   { [:MINUS, st(text)] }
             {w}\+{w}         { [:PLUS, st(text)] }
-            
-            
+
+
             [\s]+            { [:S, st(text)] }
             {string}         { [:STRING, st(text)] }
             {invalid}        { [:INVALID, st(text)] }
+            \:\:             { [st(text), st(text)]}
             .                { [st(text), st(text)] }
 
 inner

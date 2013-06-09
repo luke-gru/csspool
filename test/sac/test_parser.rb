@@ -12,6 +12,7 @@ module CSSPool
           /* This is a comment */
           div a.foo, #bar, * { background: red; }
           div#a, a.foo, a:hover, a[href][int="10"]{ background: red; }
+          div#a, a.foo, a::hover, a[href][int="10"]{ background: red; }
         eocss
         @parser = CSSPool::SAC::Parser.new(@doc)
         @parser.parse(@css)
@@ -87,6 +88,15 @@ module CSSPool
         selectors_for_rule = @doc.start_selectors[1]
         selector = selectors_for_rule[2] # => 'a:hover'
         simple_selector = selector.simple_selectors.first # => a:hover
+        assert_equal 'hover', simple_selector.additional_selectors.first.name
+        assert_nil simple_selector.additional_selectors.first.extra
+      end
+
+      # div#a, a.foo, a::hover, a[href][int="10"]{ background: red; }
+      def test_pseudo_additional_selector_with_double_colon
+        selectors_for_rule = @doc.start_selectors[2]
+        selector = selectors_for_rule[2] # => 'a::hover'
+        simple_selector = selector.simple_selectors.first # => a::hover
         assert_equal 'hover', simple_selector.additional_selectors.first.name
         assert_nil simple_selector.additional_selectors.first.extra
       end
