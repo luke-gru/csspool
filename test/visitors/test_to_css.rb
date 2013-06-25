@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 require 'helper'
 
 module CSSPool
@@ -18,15 +19,15 @@ module CSSPool
 
       # FIXME: this is a bug in libcroco
       #def test_ident_followed_by_id
-      #  doc = CSSPool.CSS 'p#div { font: foo, #666; }'
-      #  assert_equal 'p#div', doc.rule_sets.first.selectors.first.to_css
+        #doc = CSSPool.CSS 'p#div { font: foo, #666; }'
+        #assert_equal 'p#div', doc.rule_sets.first.selectors.first.to_css
 
-      #  p doc.rule_sets.first.selectors
+        #p doc.rule_sets.first.selectors
 
-      #  doc = CSSPool.CSS 'p #div { font: foo, #666; }'
+        #doc = CSSPool.CSS 'p #div { font: foo, #666; }'
 
-      #  p doc.rule_sets.first.selectors
-      #  assert_equal 'p #div', doc.rule_sets.first.selectors.first.to_css
+        #p doc.rule_sets.first.selectors
+        #assert_equal 'p #div', doc.rule_sets.first.selectors.first.to_css
       #end
 
       def test_hash_operator
@@ -121,6 +122,66 @@ module CSSPool
         doc = CSSPool.CSS(doc.to_css)
         assert_equal 2, doc.rule_sets.first.media.length
         assert_equal 1, doc.rule_sets[1].media.length
+      end
+
+      def test_media_feature_space_after_colon
+        css = <<eocss.chomp
+@media (orientation: portrait) {
+  div {
+    background: red;
+  }
+}
+eocss
+        doc = CSSPool.CSS(css)
+        assert_equal css.sub(' portrait', 'portrait'), doc.to_css
+      end
+
+      def test_media_feature_space_before_colon
+        css = <<eocss.chomp
+@media (orientation :portrait) {
+  div {
+    background: red;
+  }
+}
+eocss
+        doc = CSSPool.CSS(css)
+        assert_equal css.sub(' :portrait', ':portrait'), doc.to_css
+      end
+
+      def test_media_features_with_and
+        css = <<eocss.chomp
+@media screen and (min-width:400px) and (max-width:600px) {
+  div {
+    background: red;
+  }
+}
+eocss
+        doc = CSSPool.CSS(css)
+        assert_equal css, doc.to_css
+      end
+
+      def test_media_query_with_only_and_not
+        css = <<eocss.chomp
+@media print and (min-width:200pt) and (max-color:16), not screen and (max-width:400px) {
+  div {
+    background: red;
+  }
+}
+eocss
+        doc = CSSPool.CSS(css)
+        assert_equal css, doc.to_css
+      end
+
+      def test_media_query_with_resolution
+        css = <<eocss.chomp
+@media screen and (min-resolution:800dpi) {
+  div {
+    background: red;
+  }
+}
+eocss
+        doc = CSSPool.CSS(css)
+        assert_equal css, doc.to_css
       end
 
       def test_import

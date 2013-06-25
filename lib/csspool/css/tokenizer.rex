@@ -39,6 +39,7 @@ rule
             {w}@media{w}     { [:MEDIA_SYM, st(text)] }
             {w}!({w}|{w}{comment}{w})important{w}  { [:IMPORTANT_SYM, st(text)] }
             after|before|first-letter|first-line|selection { [:PSEUDOELEMENT, st(text)] }
+            and|only|not     { [text.upcase.intern, st(text)] }
             {ident}          { [:IDENT, st(text)] }
             \#{name}         { [:HASH, st(text)] }
             {w}~={w}         { [:INCLUDES, st(text)] }
@@ -49,6 +50,7 @@ rule
             {w}!={w}         { [:NOT_EQUAL, st(text)] }
             {w}={w}          { [:EQUAL, st(text)] }
             {w}\)            { [:RPAREN, st(text)] }
+            {w}\(            { [:LPAREN, st(text)] }
             {w}\[{w}         { [:LSQUARE, st(text)] }
             {w}\]            { [:RSQUARE, st(text)] }
             {w}\+{w}         { [:PLUS, st(text)] }
@@ -67,6 +69,7 @@ rule
             {w}{num}(deg|rad|grad){w} { [:ANGLE, st(text)] }
             {w}{num}(ms|s){w} { [:TIME, st(text)] }
             {w}{num}[k]?hz{w} { [:FREQ, st(text)] }
+            {w}{num}(dpi|dpcm) { [:RESOLUTION, st(text)]}
 
             {w}{num}%{w}     { [:PERCENTAGE, st(text)] }
             {w}{num}{w}      { [:NUMBER, st(text)] }

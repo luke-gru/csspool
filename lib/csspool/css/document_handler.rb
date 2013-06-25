@@ -20,7 +20,7 @@ module CSSPool
         @document.import_rules << CSS::ImportRule.new(
           uri,
           ns,
-          media_list.map { |x| CSS::Media.new(x, loc) },
+          media_list.map { |x| CSS::MediaType.new(x, loc) },
           @document,
           loc
         )
@@ -40,7 +40,7 @@ module CSSPool
       end
 
       def start_media media_list, parse_location = {}
-        @media_stack << media_list.map { |x| CSS::Media.new(x, parse_location) }
+        @media_stack << media_list
       end
 
       def end_media media_list, parse_location = {}

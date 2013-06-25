@@ -1,9 +1,10 @@
 class CSSPool::CSS::Parser
 
 token CHARSET_SYM IMPORT_SYM STRING SEMI IDENT S COMMA LBRACE RBRACE STAR HASH
-token LSQUARE RSQUARE EQUAL INCLUDES DASHMATCH RPAREN FUNCTION PSEUDOELEMENT GREATER PLUS
+token LSQUARE RSQUARE EQUAL INCLUDES DASHMATCH LPAREN RPAREN FUNCTION PSEUDOELEMENT GREATER PLUS
 token SLASH NUMBER MINUS LENGTH PERCENTAGE EMS EXS ANGLE TIME FREQ URI
 token IMPORTANT_SYM MEDIA_SYM
+token ONLY NOT AND RESOLUTION
 
 rule
   document
@@ -42,6 +43,52 @@ rule
         result = Terms::Ident.new interpret_identifier val.first
       }
     ;
+
+  # start added
+
+  media_query_list:
+    media_query                           { result = [val[0]] }
+  | media_query_list COMMA media_query    { result = val[0] << val[2] }
+  | /* nothing */                         { result = nil }
+  ;
+
+  media_query:
+    optional_only_or_not media_type optional_and_exprs   { result = MediaQuery.new(val[0], val[1], val[2]) }
+  | media_expr optional_and_exprs                        { result = MediaQuery.new(nil, val[0], val[1]) }
+  ;
+
+  optional_only_or_not:
+    ONLY S              { result = :only }
+  | NOT S               { result = :not }
+  | /* nothing */       { result = nil }
+  ;
+
+  media_type:
+    IDENT               { result = MediaType.new(val[0]) }
+  ;
+
+  media_expr:
+    LPAREN IDENT RPAREN                           { result = MediaType.new(val[1]) }
+  | LPAREN IDENT ':' S expr RPAREN                { result = MediaFeature.new(val[1], val[4][0])}
+  | LPAREN IDENT S ':' expr RPAREN                { result = MediaFeature.new(val[1], val[4][0])}
+  | LPAREN IDENT ':' expr RPAREN                  { result = MediaFeature.new(val[1], val[3][0])}
+  ;
+
+  optional_and_exprs:
+    optional_and_exprs S AND media_expr  { result = val[0].concat([val[3]]) }
+  | /* nothing */                        { result = []}
+  ;
+
+  resolution:
+    RESOLUTION {
+      unit = val.first.gsub(/[\s\d.]/, '')
+      number = numeric(val.first)
+      result = Terms::Resolution.new(number, unit)
+    }
+  ;
+
+# end added
+
   body
     : ruleset body
     | media body
@@ -52,8 +99,8 @@ rule
     : start_media body RBRACE { @handler.end_media val.first }
     ;
   start_media
-    : MEDIA_SYM medium LBRACE {
-        result = [val[1]].flatten
+    : MEDIA_SYM media_query_list LBRACE {
+        result = val[1]
         @handler.start_media result
       }
     | MEDIA_SYM LBRACE { result = [] }
@@ -259,6 +306,7 @@ rule
     | uri
     | hexcolor
     | function
+    | resolution
     ;
   function
     : function S { result = val.first }

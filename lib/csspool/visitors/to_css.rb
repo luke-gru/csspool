@@ -18,8 +18,7 @@ module CSSPool
       end
 
       visitor_for CSS::Document do |target|
-        # Default media list is []
-        current_media_type = []
+        current_media_query_list = []
 
         tokens = []
 
@@ -32,23 +31,41 @@ module CSSPool
         end
 
         target.rule_sets.each { |rs|
-          if rs.media != current_media_type
-            media = " " + rs.media.map do |medium|
-              escape_css_identifier medium.name.value
-            end.join(', ')
-            tokens << "#{indent}@media#{media} {"
+          if rs.media_query_list != current_media_query_list
+            media = rs.media_query_list.map { |media_q| media_q.accept(self) }.join(', ')
+            tokens << "#{indent}@media #{media} {"
             @indent_level += 1
           end
 
           tokens << rs.accept(self)
 
-          if rs.media != current_media_type
-            current_media_type = rs.media
+          if rs.media != current_media_query_list
+            current_media_query_list = rs.media_query_list
             @indent_level -= 1
             tokens << "#{indent}}"
           end
         }
         tokens.join(line_break)
+      end
+
+      visitor_for CSS::MediaType do |target|
+        escape_css_identifier(target.name)
+      end
+
+      visitor_for CSS::MediaFeature do |target|
+        "(#{escape_css_identifier(target.property)}:#{target.value})"
+      end
+
+      visitor_for CSS::MediaQuery do |target|
+        ret = ''
+        if target.only_or_not
+          ret << target.only_or_not.to_s + ' '
+        end
+        ret << target.media_expr.accept(self)
+        if target.and_exprs.any?
+          ret << ' and '
+        end
+        ret << target.and_exprs.map { |expr| expr.accept(self) }.join(' and ')
       end
 
       visitor_for CSS::Charset do |target|
@@ -129,6 +146,10 @@ module CSSPool
 
       visitor_for Terms::String do |target|
         "\"#{escape_css_string target.value}\""
+      end
+
+      visitor_for Terms::Resolution do |target|
+        "#{target.number}#{target.unit}"
       end
 
       visitor_for Selector do |target|

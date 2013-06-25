@@ -12,6 +12,8 @@ module CSSPool
 
         selectors.each { |sel| sel.rule_set = self }
       end
+
+      alias media_query_list media
     end
   end
 end
